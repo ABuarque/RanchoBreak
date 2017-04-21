@@ -3,25 +3,27 @@
 #include "Player.h"
 #include "stringHandling.h"
 
+#define DEBUG if(1)
+
 Player newPlayer(String name) {
-	Player player;
-	copyString(player.name, name);
-	player.score = 0;
+	Player player = (Player) malloc(sizeof(PLAYER_SIZE));
+	copyString(player->name, name);
+	player->score = 0;
 	return player;
 }
 
-void setScore(Player* this, int score) {
-	this->score = score;
+void destroyPlayer(Player player) {
+	free(player);
 }
 
-String getPlayerName(const Player* this) {
+int getPlayerScore(Player player) {
+	return player->score;
+}
+
+void setPlayerScore(Player player, int score) {
+	player->score = score;
+}
+
+String getPlayerName(Player this) {
 	return this->name;
-} 
-
-int getPlayerScore(const Player* this) {
-	return this->score;
-}
-
-void destroyPlayer(Player* this) {
-	free(this);
 }

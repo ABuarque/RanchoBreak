@@ -8,17 +8,17 @@ struct player {
 	int score;
 };
 
-typedef struct player Player;
+typedef struct player* Player;
 typedef struct player PLAYER_SIZE;
 
 Player newPlayer(String name);
 
-void setScore(Player* this, int score);
+void destroyPlayer(Player player);
 
-String getPlayerName(const Player* this);
+int getPlayerScore(Player player);
 
-void destroyPlayer(Player* this);
+void setPlayerScore(Player player, int score);
 
-int getPlayerScore(const Player* this);
+String getPlayerName(Player this);
 
 #endif
