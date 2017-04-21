@@ -39,7 +39,19 @@ void printPlayersList(Node list) {
 }
 
 Node removePlayer(Node list, String name) {
-
+	Node iterator = list, prevNode = NULL;
+	while(iterator != NULL && isEqual(iterator->player->name, name)) {
+		prevNode = iterator;
+		iterator = iterator->next;
+	}
+	if(iterator == NULL)
+		return list;
+	if(prevNode == NULL) 
+		list = iterator->next;
+	else
+		prevNode->next = iterator->next;
+	free(iterator);
+	return list;
 }
 
 Player getPlayer(Node list, String name) {
