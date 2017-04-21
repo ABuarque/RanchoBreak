@@ -12,6 +12,13 @@ Player newPlayer(String name) {
 	return player;
 }
 
+Player _newPlayer(String name, int score) {
+	Player player = (Player) malloc(sizeof(PLAYER_SIZE));
+	copyString(player->name, name);
+	player->score = score;
+	return player;
+}
+       
 void destroyPlayer(Player player) {
 	free(player);
 }

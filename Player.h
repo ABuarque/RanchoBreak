@@ -13,6 +13,8 @@ typedef struct player PLAYER_SIZE;
 
 Player newPlayer(String name);
 
+Player _newPlayer(String name, int score);
+
 void destroyPlayer(Player player);
 
 int getPlayerScore(Player player);
