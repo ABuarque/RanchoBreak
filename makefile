@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -I. -W -Wall
 LIBS = `pkg-config --libs allegro` -lm
-DEPS = stringHandling.h Player.h PlayersList.h
+DEPS = $(wildcard *.h)
 SRC = $(wildcard *.c)
 OBJ= $(SRC:.c=.o)
 
