@@ -6,8 +6,8 @@ To do so, over the path of cow there are some obstacles and you have to avoid th
 Our cow has a kind of jet backpack whitch helps it to do long jumps, but be carefull, the fuel is limited
 
 ## Contributors:
-## Aurélio Buarque (https://github.com/ABuarque)
-## Pedro Soares (https://github.com/pedrohsoares)
++ Aurélio Buarque (https://github.com/ABuarque)
++ Pedro Soares (https://github.com/pedrohsoares)
 
 # Project knowledges used
 + On developing process, this app has used primitives for store things like players scores and the number of remaining lives of our cow;
