@@ -18,9 +18,9 @@ Our cow has a kind of jet backpack whitch helps it to do long jumps, but be care
 + Functions were used to package and reuse instructions block like the function which returns a new player object; 
 + Pointers were used to create the tree and the pointers for structs of players and cow;
 + Files were used to handle the app data in such a way that we could persist them in a text file;
-+ The Binary Search Tree data structure was used to hold all the players;
-+ Recursion were used in some situations of the created Tree like searching within it; 
++ The Linked List data structure was used to hold all the players;
++ Recursion were used in some situations of the created Linked List like searching within it; 
 + Condicionals were used to check some conditions like object colisions; 
 + Dinamic allocation was used to create pointers for our structs like creating a new player object;
-+ Binary search algorithm was used to get players ranking on our tree;
-+ We also used sorting process when we added new players into our tree; 
++ Binary search algorithm was used to get players ranking on our Linked List;
++ We also used sorting process when we added new players into our Linked List; 
