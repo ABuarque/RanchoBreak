@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -I. -W -Wall
-LIBS = `pkg-config --libs allegro` -lm
+LIBS = `allegro-config --shared` -lm
 DEPS = $(wildcard *.h)
 SRC = $(wildcard *.c)
 OBJ= $(SRC:.c=.o)

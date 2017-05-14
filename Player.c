@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Player.h"
 #include "stringHandling.h"
+#include "Player.h"
+
 
 #define DEBUG if(1)
 
@@ -18,7 +19,7 @@ Player _newPlayer(String name, int score) {
 	player->score = score;
 	return player;
 }
-       
+
 void destroyPlayer(Player player) {
 	free(player);
 }
