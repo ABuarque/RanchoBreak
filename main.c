@@ -1,15 +1,20 @@
 #include <allegro.h>
+#include <stdio.h>
 #include <locale.h>
 #define WHITE makecol(255,255,255)
 #define BLACK makecol(0,0,0)
 #include "LittleCow.h"
 #include "Player.h"
+#include "HandleFiles.h"
+#include "PlayersList.h"
+
 
 void init();
 void deinit();
 void gameOver();
 int mainMenu(BITMAP *buffer);
 int initGame(BITMAP *buffer);
+void ranking(BITMAP *buffer);
 int insertName(BITMAP *buffer,char *name);
 
 volatile int milisegundos;
@@ -27,59 +32,20 @@ END_OF_FUNCTION(stunTimerIncrement);
 FONT* verdana;
 FONT* constantia;
 Player player;
-
+Node playersList = NULL;
 
 int main(){
   init();
   BITMAP* buffer = create_bitmap(SCREEN_W, SCREEN_H);
-
+  playersList = newPlayersList();
   verdana = load_font("fonts/verdana.pcx",NULL,NULL);
   constantia = load_font("fonts/constantia.pcx",NULL,NULL);
-
-  while(mainMenu(buffer) != 2 || key[KEY_ESC]){
-    if(mainMenu(buffer) == 0){
-      clear_bitmap(buffer);
-      char *name;
-      name = malloc(sizeof(char)*100);
-      name[0] = '\0';
-      if(insertName(buffer,name) == 1){
-        player = newPlayer(name);
-        if(initGame(buffer) == 1){
-          allegro_message("GAME OVER!!!\nYour score was %d!",getPlayerScore(player));
-        }
-      }
-    }
-  }
-
-  deinit();
-
-  return 0;
-}
-END_OF_MAIN();
-
-void init(){
-  allegro_init();
-  install_timer();
-  install_keyboard();
-  set_color_depth(32);
-  set_gfx_mode(GFX_AUTODETECT_WINDOWED, 800, 600, 0, 0);
-  setlocale(LC_ALL, "Portuguese");
-  set_window_title("RanchoBreak!");
-}
-
-void deinit() {
-  clear_keybuf();
-}
-
-int mainMenu(BITMAP *buffer){
   BITMAP *logo = load_bitmap("imgs/logo.bmp", NULL);
-  BITMAP* fundo = load_bitmap("imgs/background-menu.bmp", NULL);
-
+  BITMAP *background = load_bitmap("imgs/background-menu.bmp", NULL);
   int opcao_menu = 0;
 
-  while(!key[KEY_ESC]){
-    clear_bitmap(buffer);
-    draw_sprite(buffer, fundo, 0, 0);
+  while(1){
+    draw_sprite(buffer, background, 0, 0);
     draw_sprite(buffer, logo, 120, 80);
 
     if (key[KEY_UP]){
@@ -104,16 +70,68 @@ int mainMenu(BITMAP *buffer){
       textprintf_ex(buffer,constantia,350,460,WHITE,-1,"EXIT");
     }
 
-     if(key[KEY_ENTER]){
-      remove_keyboard();
-      install_keyboard();
-      return opcao_menu;
+    if(key[KEY_ENTER]){
+      if(opcao_menu == 0){
+        char *name;
+        name = malloc(sizeof(char)*100);
+        name[0] = '\0';
+        if(insertName(buffer,name) == 1){
+          player = newPlayer(name);
+          if(initGame(buffer) == 1){
+            allegro_message("GAME OVER!!!\nYour score was %d!",getPlayerScore(player));
+            playersList = getListPlayers();
+            addSorted(playersList, player);
+            saveListPlayers(playersList);
+          }
+        }
+      }else if(opcao_menu == 1){
+        playersList = getListPlayers();
+        ranking(buffer);
+      }else{
+        break;
+      }
     }
 
     draw_sprite(screen, buffer, 0, 0);
   }
 
-  return 2;
+  deinit();
+
+  return 0;
+}
+END_OF_MAIN();
+
+void init(){
+  allegro_init();
+  install_timer();
+  install_keyboard();
+  set_color_depth(32);
+  set_gfx_mode(GFX_AUTODETECT_WINDOWED, 800, 600, 0, 0);
+  setlocale(LC_ALL, "Portuguese");
+  set_window_title("RanchoBreak!");
+}
+
+void deinit() {
+  clear_keybuf();
+  destroyPlayersList(playersList);
+  destroyPlayer(player);
+}
+
+void ranking(BITMAP *buffer){
+  int i;
+  clear_bitmap(buffer);
+
+  BITMAP *logo = load_bitmap("imgs/logo.bmp", NULL);
+  BITMAP *background = load_bitmap("imgs/background-menu.bmp", NULL);
+  BITMAP *ranking = load_bitmap("imgs/ranking.bmp",NULL);
+  
+  draw_sprite(buffer, background, 0, 0);
+  draw_sprite(buffer, logo, 120, 80);
+
+  while(!key[KEY_ESC]){
+    show(buffer,playersList);
+    draw_sprite(screen, buffer, 0, 0);
+  }
 }
 
 int initGame(BITMAP *buffer){
@@ -133,6 +151,15 @@ int initGame(BITMAP *buffer){
   butcherAttack[1] = load_bitmap("imgs/attack2.bmp",NULL);
   butcherAttack[2] = load_bitmap("imgs/attack3.bmp",NULL);
 
+  float x=0.0,xButcher=0.0;
+  int pulo = 0, stun = 0;
+  int frame_atual,frameButcher,frameAtk;
+  int tempo_troca = 100;
+  int x_cerca;
+  int vida=0,x_vida;
+  int flag_cerca = 0,death=0;
+  int score=0,aux=0;
+  Cow cow = newCow();
 
   milisegundos = 0;
   LOCK_FUNCTION(msec_counter);
@@ -149,28 +176,18 @@ int initGame(BITMAP *buffer){
   LOCK_VARIABLE(stunTimer);
   install_int_ex(stunTimerIncrement, SECS_TO_TIMER(1));
 
-  float x=0.0,xButcher=0.0;
-  int pulo = 0, stun = 0;
-  int frame_atual,frameButcher;
-  int tempo_troca = 100;
-  int x_cerca;
-  int vida=0,x_vida;
-  int flag_cerca = 0,death=0;
-  int score=0,aux=0;
-  Cow cow = newCow();
 
   while(!key[KEY_ESC]){
     if(key[KEY_ESC]){
+      remove_keyboard();
+      install_keyboard();
       clear_bitmap(buffer);
       return 0;
     }
 
     //UPDATE
-    if(!death){
-      frameButcher = (milisegundos/tempo_troca) % 6;
-    }else{
-      frameButcher = (milisegundos/tempo_troca) % 3;
-    }
+    frameButcher = (milisegundos/tempo_troca) % 6;
+    frameAtk = (milisegundos/tempo_troca) % 3;
     if(key[KEY_SPACE] && getCowCoordY(cow) == 500) pulo = 1;
     if(getCowLifes(cow)) frame_atual = (milisegundos / tempo_troca) % 4;
     if(!getCowLifes(cow)) frame_atual = (milisegundos / 400) % 4;
@@ -180,10 +197,15 @@ int initGame(BITMAP *buffer){
     if(getCowCoordY(cow) < 400 || stun) pulo = 0;
     if(!pulo && getCowCoordY(cow)  < 500) setCowCoordY(cow,0.2);
 
-    if(!stun) score = timer*10;
+    if(!stun && !death) score = timer*10;
 
     if(x > -1000 && !flag_cerca){
-      x_cerca = (rand() % 300 + 1400)*(-1);
+      int temp;
+      temp = (rand() % 300 + 1400)*(-1);
+        while(temp >= x_vida+200 && temp <= x_vida-200){
+          temp = (rand() % 400 + 1400)*(-1);
+      }
+      x_cerca = temp;
       flag_cerca = 1;
     }
 
@@ -211,7 +233,10 @@ int initGame(BITMAP *buffer){
     }
 
     if(stunTimer == 2){
-      if(stun) stun = 0;
+      if(stun){
+        stun = 0;
+        timer-=2;
+      } 
     }
 
     if(stunTimer == 3 && aux){
@@ -219,19 +244,21 @@ int initGame(BITMAP *buffer){
       return 1;
     }
 
-    if(stunTimer%60 == 0 && stunTimer && getCowLifes(cow) != 3 && !vida){
-      vida = 2;
-
-      if(x < -1255){
-        x_vida = (rand() % 400 + 1400)*(-1);
-        while(x_vida >= x_cerca+120 && x_vida <= x_cerca-120){
-          x_vida = (rand() % 400 + 1400)*(-1);
+    if(stunTimer%10 == 0 && stunTimer && getCowLifes(cow) != 3 && !vida){
+      int temp;
+      vida = 1;
+      if(x > -1000){
+        temp = (rand() % 300 + 1400)*(-1);
+        while(temp <= x_cerca+200 && temp >= x_cerca-200){
+          temp = (rand() % 400 + 1400)*(-1);
         }
+        x_vida = temp;
       }
       stunTimer = 0;
     }
 
-    if(x + getCowCoordX(cow) >= x_vida+580 &&  x+getCowCoordX(cow) <= x_vida + 600 && vida && getCowCoordY(cow) >= 490){
+    printf("V:%d C:%d\n", x_vida,x_cerca);
+    if(x + getCowCoordX(cow) <= x_vida+640 &&  x+getCowCoordX(cow) >= x_vida+620 && vida && getCowCoordY(cow) >= 490){
       x_vida = 0;
       setCowLifes(cow,1);
       vida = 0;
@@ -244,14 +271,16 @@ int initGame(BITMAP *buffer){
     draw_sprite(buffer,cena2,x+1255,458);
     draw_sprite(buffer,cena,x+2362,458);
     draw_sprite(buffer,cerca,x+abs(x_cerca),440);
-    draw_sprite(buffer,life,x+abs(x_vida),520);
+    if(vida){
+       draw_sprite(buffer,life,x-x_vida,520);
+    }
     
     if(!death) draw_sprite(buffer,butcher[frameButcher],xButcher,480);
     if(getCowCoordY(cow) == 500 && !stun && getCowLifes(cow)) draw_sprite(buffer, cow->animationSprites[0][frame_atual], getCowCoordX(cow), getCowCoordY(cow));
     if(getCowCoordY(cow) < 500 && !stun && getCowLifes(cow)) draw_sprite(buffer, cow->animationSprites[1][frame_atual], getCowCoordX(cow), getCowCoordY(cow));
     if(stun && !death) draw_sprite(buffer,cow->animationSprites[3][frame_atual],getCowCoordX(cow)-30,getCowCoordY(cow)-30);
     if(death){
-      draw_sprite(buffer,butcherAttack[frameButcher],xButcher,450);
+      draw_sprite(buffer,butcherAttack[frameAtk],xButcher,450);
       if(frame_atual > 2 && !aux){
         draw_sprite(buffer,cow->animationSprites[2][frame_atual],getCowCoordX(cow)-30,getCowCoordY(cow)-10);
       }else{
@@ -309,7 +338,11 @@ int insertName(BITMAP *buffer,char *name){
         allegro_message("Name invalid!!");
     }
 
-    if(key[KEY_ESC]) break;
+    if(key[KEY_ESC]){
+      remove_keyboard();
+      install_keyboard();
+      break;
+    } 
   }while(1);
 
   return 0;
