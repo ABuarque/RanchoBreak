@@ -6,6 +6,8 @@ To do so, over the path of cow there are some obstacles and you have to avoid th
 
 To jump the cow, you just have press space. 
 
+To get the game, run to the directory that you have cloned, open the terminal and type make, and then ./app
+
 ## Contributors:
 + Aurélio Buarque (https://github.com/ABuarque)
 + Pedro Soares (https://github.com/pedrohsoares)
