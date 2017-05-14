@@ -13,7 +13,7 @@ void savePlayer(CStream stream, Player player) {
 }
 
 void saveListPlayers(Node list) {
-	CStream handleFile = openFile(FILE_PATH, "a");
+	CStream handleFile = openFile(FILE_PATH, "w");
 	Node iterator;
 	for(iterator = list; iterator != NULL; iterator = iterator->next)
 		savePlayer(handleFile, iterator->player);
