@@ -244,7 +244,7 @@ int initGame(BITMAP *buffer){
       return 1;
     }
 
-    if(stunTimer%10 == 0 && stunTimer && getCowLifes(cow) != 3 && !vida){
+    if(stunTimer%30 == 0 && stunTimer && getCowLifes(cow) != 3 && !vida){
       int temp;
       vida = 1;
       if(x > -1000){
@@ -256,8 +256,7 @@ int initGame(BITMAP *buffer){
       }
       stunTimer = 0;
     }
-
-    printf("V:%d C:%d\n", x_vida,x_cerca);
+    
     if(x + getCowCoordX(cow) <= x_vida+640 &&  x+getCowCoordX(cow) >= x_vida+620 && vida && getCowCoordY(cow) >= 490){
       x_vida = 0;
       setCowLifes(cow,1);
