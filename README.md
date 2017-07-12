@@ -4,7 +4,7 @@
 This app is a simple game made in C where a cow is running way from a butcher and you can help it to not became a barbecue.
 To do so, over the path of cow there are some obstacles and you have to avoid them by jumping the cow.
 
-To jump the cow, you just have press space. 
+To jump the cow, you just have to press space. 
 
 To get the game, run to the directory that you have cloned, open the terminal and type make, and then ./app
 
